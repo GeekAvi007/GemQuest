@@ -18,32 +18,13 @@ export default function App() {
   const [input, setInput] = useState("");
   const [answer, setAnswer] = useState("");
   const [loading, setLoading] = useState(false);
-  const [history, setHistory] = useState([]);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     if (isLoaded && user) {
-      fetchChatHistory();
+      // Removed fetchChatHistory call since chat history section is removed
     }
   }, [isLoaded, user]);
-
-  const fetchChatHistory = async () => {
-    try {
-      const response = await databases.listDocuments(
-        import.meta.env.VITE_APPWRITE_DATABASE_ID,
-        import.meta.env.VITE_APPWRITE_COLLECTION_ID,
-        [
-          Query.equal("userId", user.id),
-          Query.orderDesc("$createdAt"),
-          Query.limit(20)
-        ]
-      );
-      setHistory(response.documents);
-    } catch (err) {
-      console.error("Failed to fetch history:", err);
-      setError("Failed to load chat history");
-    }
-  };
 
   const handleSubmit = async () => {
     if (!input.trim() || loading) return;
@@ -81,7 +62,6 @@ export default function App() {
             `delete("user:${user.id}")`
           ]
         );
-        fetchChatHistory(); // Refresh history
       }
 
       setInput("");
@@ -93,28 +73,8 @@ export default function App() {
     }
   };
 
-  const loadFromHistory = (item) => {
-    setInput(item.question);
-    setAnswer(item.answer);
-  };
-
   return (
-    <div className="flex h-screen bg-gray-100 text-gray-900">
-      {/* Sidebar */}
-      <aside className="w-64 bg-gray-800 text-white p-4 overflow-y-auto">
-        <h2 className="text-xl font-bold mb-4">Chat History</h2>
-        {history.map((item) => (
-          <button
-            key={item.$id}
-            onClick={() => loadFromHistory(item)}
-            className="block w-full text-left mb-2 p-2 bg-gray-700 rounded hover:bg-gray-600 truncate"
-            title={item.question}
-          >
-            {item.question.slice(0, 50)}{item.question.length > 50 ? "..." : ""}
-          </button>
-        ))}
-      </aside>
-
+    <div className="flex flex-col h-screen bg-gray-100 text-gray-900">
       {/* Main content */}
       <main className="flex-1 flex flex-col p-6">
         <SignedOut>
